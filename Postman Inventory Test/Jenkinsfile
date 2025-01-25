@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'NodeJS'
+    }
+
+    stages {
+        stage('Install Newman & Reporter (if needed)') {
+            steps {
+                echo 'Ensuring Newman and htmlextra reporter are globally installed...'
+                bat 'npm install -g newman newman-reporter-htmlextra'
+            }
+        }
+
+        stage('Run Mock Server API Tests') {
+            steps {
+                echo 'Executing Postman tests against Mock Server via run_mock_tests.bat...'
+                bat '.\\run_mock_postman_tests.bat'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Archiving HTML test report for Mock Server tests...'
+            publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'reports',
+                reportFiles: 'mock_inventory_report.html',
+                reportName: 'Postman Inventory Mock Test Report'
+            ])
+        }
+        success {
+            echo 'Mock Server API Test Pipeline finished successfully!'
+        }
+        failure {
+            echo 'Mock Server API Test Pipeline FAILED!'
+        }
+    }
+}

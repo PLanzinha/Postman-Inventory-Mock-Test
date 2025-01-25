@@ -1,0 +1,340 @@
+{
+	"info": {
+		"_postman_id": "0311eacc-c80a-42b8-b004-b9b12b18bcd7",
+		"name": "Postman Inventory Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45251555"
+	},
+	"item": [
+		{
+			"name": "Get All Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"const responseJson = pm.response.json();",
+							"pm.test(\"Response is an array\", function () {",
+							"    pm.expect(responseJson).to.be.an('array');",
+							"});",
+							"pm.test(\"Array contains at least one product\", function () {",
+							"    pm.expect(responseJson.length).to.be.greaterThan(0);",
+							"});",
+							"pm.test(\"Each product has id, name, category, price, inStock properties\", function() {",
+							"    responseJson.forEach(function(product) {",
+							"        pm.expect(product).to.have.all.keys('id', 'name', 'category', 'price', 'inStock');",
+							"        pm.expect(product.id).to.be.a('string');",
+							"        pm.expect(product.name).to.be.a('string');",
+							"        pm.expect(product.price).to.be.a('number');",
+							"        pm.expect(product.inStock).to.be.a('boolean');",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{mockBaseUrl}}/products",
+					"host": [
+						"{{mockBaseUrl}}"
+					],
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success - List of Products",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mockBaseUrl}}/products",
+							"host": [
+								"{{mockBaseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_ sowohl_ proviene_id": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"id\": \"prod_123\",\n        \"name\": \"Super Widget\",\n        \"category\": \"Widgets\",\n        \"price\": 19.99,\n        \"inStock\": true\n    },\n    {\n        \"id\": \"prod_456\",\n        \"name\": \"Mega Gadget\",\n        \"category\": \"Gadgets\",\n        \"price\": 49.50,\n        \"inStock\": false\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "Get Specific Product (prod_123)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"const responseJson = pm.response.json();",
+							"pm.test(\"Product ID matches requested ID\", function() {",
+							"    pm.expect(responseJson.id).to.eql(\"prod_123\");",
+							"});",
+							"pm.test(\"Product has expected detailed structure\", function() {",
+							"    pm.expect(responseJson).to.have.all.keys('id', 'name', 'description', 'category', 'price', 'inStock', 'specs');",
+							"    pm.expect(responseJson.specs).to.be.an('object');",
+							"    pm.expect(responseJson.specs).to.have.all.keys('color', 'weight_kg');",
+							"});",
+							"pm.test(\"Product name is 'Super Widget'\", function() {",
+							"    pm.expect(responseJson.name).to.eql(\"Super Widget\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{mockBaseUrl}}/products/prod_123",
+					"host": [
+						"{{mockBaseUrl}}"
+					],
+					"path": [
+						"products",
+						"prod_123"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success - Specific Product Details",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mockBaseUrl}}/products/prod_123",
+							"host": [
+								"{{mockBaseUrl}}"
+							],
+							"path": [
+								"products",
+								"prod_123"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_status_text_provenance_id": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"prod_123\",\n    \"name\": \"Super Widget\",\n    \"description\": \"The best widget you will ever own!\",\n    \"category\": \"Widgets\",\n    \"price\": 19.99,\n    \"inStock\": true,\n    \"specs\": {\n        \"color\": \"blue\",\n        \"weight_kg\": 0.5\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Non-Existent Product (prod_999 - Expect 404)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"const responseJson = pm.response.json();",
+							"pm.test(\"Error message is correct\", function() {",
+							"    pm.expect(responseJson.error).to.eql(\"Product not found\");",
+							"});",
+							"pm.test(\"Response contains the requested productId\", function() {",
+							"    pm.expect(responseJson.productId).to.eql(\"prod_999\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{mockBaseUrl}}/products/prod_999",
+					"host": [
+						"{{mockBaseUrl}}"
+					],
+					"path": [
+						"products",
+						"prod_999"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Error - Product Not Found",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mockBaseUrl}}/products/prod_999",
+							"host": [
+								"{{mockBaseUrl}}"
+							],
+							"path": [
+								"products",
+								"prod_999"
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_status_text_provenance_id": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": \"Product not found\",\n    \"productId\": \"prod_999\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Create New Product (POST)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"const responseJson = pm.response.json();",
+							"pm.test(\"Response contains a product ID\", function() {",
+							"    pm.expect(responseJson.id).to.be.a('string').and.not.be.empty;",
+							"    pm.expect(responseJson.id).to.eql('prod_789'); ",
+							"});",
+							"pm.test(\"Response contains success message\", function() {",
+							"    pm.expect(responseJson.message).to.eql(\"Product created successfully (mocked)\");",
+							"});",
+							"const requestBody = JSON.parse(pm.request.body.raw);",
+							"pm.test(\"Mock response (default) contains some expected default fields\", function() {",
+							"    pm.expect(responseJson.name).to.eql(\"New Shiny Product\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Awesome New Gadget\",\n    \"category\": \"Gadgets\",\n    \"price\": 29.99,\n    \"inStock\": true\n}"
+				},
+				"url": {
+					"raw": "{{mockBaseUrl}}/products",
+					"host": [
+						"{{mockBaseUrl}}"
+					],
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success - Product Created",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Awesome New Gadget\",\n    \"category\": \"Gadgets\",\n    \"price\": 29.99,\n    \"inStock\": true\n}"
+						},
+						"url": {
+							"raw": "{{mockBaseUrl}}/products",
+							"host": [
+								"{{mockBaseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_status_text_provenance_id": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"prod_789\", \n    \"name\": \"New Shiny Product\", \n    \"category\": \"General\",\n    \"price\": 0.00,\n    \"inStock\": true,\n    \"message\": \"Product created successfully (mocked)\"\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "mockBaseUrl",
+			"value": "https://7d9325ce-5c98-44dd-9bc8-eb9b799f1d1b.mock.pstmn.io",
+			"type": "string"
+		}
+	]
+}
